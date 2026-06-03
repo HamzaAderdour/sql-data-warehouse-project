@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------
+  # 1. THE DATABASE ENGINE (PostgreSQL)
+  # ----------------------------------------
+  postgres_db:
+    image: postgres:16
+    container_name: my_learning_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: bid_project_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # ----------------------------------------
+  # 2. THE VISUAL INTERFACE (pgAdmin)
+  # ----------------------------------------
+  pgadmin_gui:
+    image: dpage/pgadmin4
+    container_name: my_learning_gui
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres_db
+
+# ----------------------------------------
+# 3. THE HARD DRIVE (Volumes)
+# ----------------------------------------
+volumes:
+  pgdata:

@@ -30,13 +30,19 @@ Le projet s'exécute dans un réseau virtuel privé et isolé (`data_network`) c
 
 ### 🧹 2. Couche Silver (Nettoyage & Transformation)
 * **Objectif** : Transformer les données brutes de la couche Bronze en données propres, typées, dédupliquées et prêtes pour l'analyse.
-* **Philosophie Modern-ELT** : Découplage total entre l'**orchestration** (gérée par Python : gestion des erreurs, logs, transactions ACID, calcul des temps d'exécution) et la **computation** (gérée par le moteur ultra-performant de PostgreSQL).
+* **Philosophie Modern-ELT** : Découplage total entre l'**orchestration** (gérée par Python) et la **computation** (gérée par PostgreSQL).
 * **Transformations clés implémentées** :
-  - **Déduplication** : Utilisation de fenêtrages SQL (`ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)`) pour ne conserver que la version la plus récente de chaque enregistrement (ex: données clients).
-  - **Normalisation** : Uniformisation des formats de chaînes textuelles (`TRIM`, standardisation des codes genres et statuts matrimoniaux via des blocs `CASE WHEN`).
-  - **Gestion des dates** : Conversion des formats numériques ou textuels de type `YYYYMMDD` en vrais types temporels SQL (`TO_DATE`), et calcul dynamique des fins de validité des produits (`LEAD`).
-  - **Qualité des données** : Nettoyage des valeurs aberrantes ou négatives sur les ventes et les prix, et traitement des valeurs manquantes (`COALESCE`, `NULLIF`).
-  - **Traçabilité** : Ajout systématique d'un horodatage technique de chargement (`dwh_create_date` via `CURRENT_TIMESTAMP`).
+  - **Déduplication** : Utilisation de fenêtrages SQL (`ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)`) pour ne conserver que la version la plus récente.
+  - **Normalisation** : Uniformisation des formats de chaînes textuelles (`TRIM`, standardisation via des blocs `CASE WHEN`).
+  - **Gestion des dates** : Conversion des formats `YYYYMMDD` en vrais types temporels SQL (`TO_DATE`), et calcul dynamique des fins de validité (`LEAD`).
+  - **Qualité des données** : Nettoyage des valeurs aberrantes et traitement des valeurs manquantes (`COALESCE`, `NULLIF`).
+
+### 🌟 3. Couche Gold (Modélisation Métier & Analytique)
+* **Objectif** : Fournir des données prêtes à être consommées par des outils de Business Intelligence (PowerBI, Tableau) via un modèle en **Schéma en Étoile** (Star Schema).
+* **Implémentation** :
+  - Utilisation de **Vues SQL (`VIEW`)** pour structurer la couche analytique sans dupliquer physiquement les données, garantissant des requêtes en temps réel sur la couche Silver.
+  - **Tables de Dimensions (`dim_`)** : Création de `dim_customers` et `dim_products` avec génération de **Clés de Substitution (Surrogate Keys)** via `ROW_NUMBER()`. Gestion des conflits de sources de données (ex: consolidation du genre client entre le CRM et l'ERP via `COALESCE`).
+  - **Table de Faits (`fact_`)** : Création de `fact_sales` agrégeant les métriques clés (ventes, quantités, prix) et connectée aux dimensions via les Surrogate Keys.
 
 ---
 

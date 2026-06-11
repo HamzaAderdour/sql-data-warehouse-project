@@ -39,7 +39,7 @@ The objective of this project is to build a centralized analytical platform capa
 
 # 🏗️ Solution Architecture
 
-The platform is implemented using a Medallion Data Architecture.
+The platform follows a multi-layer Medallion Architecture extended with a dedicated Analytics Layer for decision support.
 
 ```text
 Raw Data Sources
@@ -53,8 +53,8 @@ Raw Data Sources
         ▼
 ┌─────────────────┐
 │ Silver Layer    │
-│ Cleansing &     │
-│ Transformation  │
+│ Data Cleansing  │
+│ & Standardization
 └─────────────────┘
         │
         ▼
@@ -68,6 +68,17 @@ Raw Data Sources
 │ Business        │
 │ Analysis Layer  │
 └─────────────────┘
+        │
+        ▼
+┌─────────────────┐
+│ Analytics Layer │
+│ KPI & Business  │
+│ Views           │
+└─────────────────┘
+        │
+        ▼
+Future
+FastAPI → Dashboard → Decision Support Platform
 ```
 
 ---
@@ -135,8 +146,23 @@ Sales_Intelligence_Platform/
 │   │   ├── quality_checks_silver.sql
 │   │   └── quality_checks_gold.sql
 │   │
-│   └── business_analysis/
-│       └── 01_gold_business_analysis.sql
+│   ├── business_analysis/
+│   │   ├── 01_gold_business_analysis.sql
+│   │   └── analysis_results.md
+│   │
+│   └── analytics/
+│       ├── 01_create_analytics_schema.sql
+│       ├── 02_kpi_overview.sql
+│       ├── 03_sales_trend.sql
+│       ├── 04_country_performance.sql
+│       ├── 05_margin_analysis.sql
+│       ├── 06_product_pareto.sql
+│       ├── 07_customer_retention.sql
+│       ├── 08_customer_rfm.sql
+│       ├── 09_customer_profile.sql
+│       ├── 10_business_insights.sql
+│       ├── load_analytics.py
+│       └── README.md
 │
 ├── Data_Catalog.md
 ├── docker-compose.yml
@@ -293,6 +319,104 @@ Based on the analysis, the following opportunities were identified:
 
 ---
 
+# 📊 Analytics Layer
+
+## Objective
+
+Transform the Gold Layer into reusable business-oriented analytical views designed to support dashboards, APIs, and decision-making processes.
+
+Unlike the Gold Layer, which provides a generic Star Schema, the Analytics Layer exposes ready-to-consume KPIs and business metrics.
+
+---
+
+## Analytics Views
+
+| View                          | Purpose                         |
+| ----------------------------- | ------------------------------- |
+| analytics.kpi_overview        | Executive KPIs                  |
+| analytics.sales_trend         | Revenue evolution over time     |
+| analytics.country_performance | Market performance by country   |
+| analytics.margin_analysis     | Product profitability           |
+| analytics.product_pareto      | Product concentration analysis  |
+| analytics.customer_retention  | Purchase frequency distribution |
+| analytics.customer_rfm        | RFM customer segmentation       |
+| analytics.customer_profile    | Customer demographics           |
+| analytics.business_insights   | Strategic business summary      |
+
+---
+
+## Analytics Automation
+
+The entire Analytics Layer can be generated automatically.
+
+```bash
+docker-compose exec etl_pipeline python scripts/analytics/load_analytics.py
+```
+
+The automation script:
+
+* Detects all SQL files automatically.
+* Executes them in numerical order.
+* Commits successful executions.
+* Rolls back transactions on failure.
+* Produces execution logs for traceability.
+
+This removes the need to execute Analytics scripts manually through pgAdmin.
+
+---
+
+## Validated Business Results
+
+The Analytics Layer produced the following business insights:
+
+| KPI                              |       Value |
+| -------------------------------- | ----------: |
+| Total Revenue                    |      29.36M |
+| Total Orders                     |      27,657 |
+| Total Customers                  |      18,482 |
+| Sold Products                    |         130 |
+| Average Order Value              |    1,061.26 |
+| Revenue per Customer             |    1,588.10 |
+| Bikes Revenue Share              |      96.46% |
+| Highest Margin Category          | Accessories |
+| Accessories Margin               |      62.76% |
+| Best Market                      |   Australia |
+| Revenue per Customer (Australia) |    2,523.02 |
+| One-Time Customers               |      62.86% |
+| Customers with 1–2 Orders        |      92.37% |
+| Best Revenue Year                |        2013 |
+| Revenue in 2013                  |      16.34M |
+
+---
+
+## Strategic Insights
+
+The analysis highlighted several important business opportunities:
+
+### Market Expansion
+
+Australia generates the highest revenue per customer despite having fewer customers than the United States.
+
+### Cross-Selling Opportunity
+
+Accessories generate the highest margin percentage and represent an ideal candidate for bundle offers and cross-selling campaigns.
+
+### Customer Retention
+
+More than 60% of customers place only one order.
+
+Improving customer retention could generate significantly more value than acquiring new customers.
+
+### Product Concentration Risk
+
+A small number of bike products generate a large share of revenue, creating dependency on a limited product portfolio.
+
+### Historical Growth Analysis
+
+The year 2013 represents the strongest growth period and should be investigated to understand the drivers behind that expansion.
+
+---
+
 # 📖 Data Catalog
 
 The complete business glossary and Gold Layer documentation are available in:
@@ -303,9 +427,9 @@ Data_Catalog.md
 
 ---
 
-# 🚀 Running the Project
+# 🚀 Running the Complete Pipeline
 
-## 1. Build and Start Infrastructure
+## 1. Start Infrastructure
 
 ```bash
 docker-compose up -d --build
@@ -334,7 +458,7 @@ docker-compose exec etl_pipeline python scripts/bronze/load_bronze.py
 
 ---
 
-## 4. Build Silver Layer
+## 4. Load Silver Layer
 
 Execute:
 
@@ -362,8 +486,6 @@ scripts/gold/gold_ddl.sql
 
 ## 6. Execute Quality Checks
 
-Run:
-
 ```text
 scripts/tests/quality_checks_silver.sql
 scripts/tests/quality_checks_gold.sql
@@ -373,15 +495,21 @@ scripts/tests/quality_checks_gold.sql
 
 ## 7. Execute Business Analysis
 
-Run:
-
 ```text
 scripts/business_analysis/01_gold_business_analysis.sql
 ```
 
 ---
 
-## 8. Stop Infrastructure
+## 8. Create Analytics Layer
+
+```bash
+docker-compose exec etl_pipeline python scripts/analytics/load_analytics.py
+```
+
+---
+
+## 9. Stop Infrastructure
 
 ```bash
 docker-compose stop
@@ -391,7 +519,7 @@ docker-compose stop
 
 # 📈 Project Roadmap
 
-### Phase 1 — Completed
+## Phase 1 — Completed
 
 ✅ Bronze Layer
 
@@ -403,27 +531,43 @@ docker-compose stop
 
 ✅ Business Analysis
 
-### Phase 2 — In Progress
+✅ Analytics Layer
 
-🔄 Analytics Layer
+✅ KPI Views
 
-🔄 KPI Views
+✅ Customer Segmentation
 
-🔄 Customer Segmentation
+✅ Product Profitability Analysis
 
-🔄 Product Profitability Analysis
+✅ Analytics Automation
 
-### Phase 3 — Planned
+---
 
-⏳ FastAPI Backend
+## Phase 2 — Next Step
 
-⏳ REST Analytics API
+🔄 FastAPI Backend
 
-⏳ Interactive Dashboard
+🔄 Analytics REST API
 
-⏳ AI-Assisted Frontend Development
+🔄 Swagger Documentation
 
-⏳ Fully Dockerized Decision Support Platform
+🔄 Dockerized API Service
+
+---
+
+## Phase 3 — Planned
+
+⏳ AI-Generated Frontend (Lovable)
+
+⏳ Executive Dashboard
+
+⏳ Customer Intelligence Dashboard
+
+⏳ Product Intelligence Dashboard
+
+⏳ Strategic Business Dashboard
+
+⏳ End-to-End Decision Support Platform
 
 ---
 

@@ -43,6 +43,22 @@ services:
     networks:
       - data_network
 
+  # ----------------------------------------
+  # 4. THE API SERVICE (FastAPI)
+  # ----------------------------------------
+  api_dashboard:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api_dashboard
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+    networks:
+      - data_network
+
+
 # ----------------------------------------
 # 4. THE HARD DRIVE (Volumes)
 # ----------------------------------------

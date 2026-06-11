@@ -77,44 +77,53 @@ Raw Data Sources
 └─────────────────┘
         │
         ▼
+┌─────────────────┐
+│ FastAPI Backend │
+│ REST API        │
+│ /docs Swagger   │
+└─────────────────┘
+        │
+        ▼
 Future
-FastAPI → Dashboard → Decision Support Platform
+AI Dashboard → Decision Support Platform
 ```
 
 ---
 
 # 🛠️ Technology Stack
 
-| Component               | Technology     |
-| ----------------------- | -------------- |
-| Database                | PostgreSQL 16  |
-| ETL / ELT               | Python 3.11    |
-| Database Driver         | psycopg2       |
-| Containerization        | Docker         |
-| Orchestration           | Docker Compose |
-| Database Administration | pgAdmin 4      |
-| Version Control         | Git & GitHub   |
+| Component               | Technology      |
+| ----------------------- | --------------- |
+| Database                | PostgreSQL 16   |
+| ETL / ELT               | Python 3.11     |
+| Database Driver         | psycopg2        |
+| REST API Framework      | FastAPI         |
+| API Server              | Uvicorn         |
+| Containerization        | Docker          |
+| Orchestration           | Docker Compose  |
+| Database Administration | pgAdmin 4       |
+| Version Control         | Git & GitHub    |
 
 ---
 
 # 🐳 Docker Infrastructure
 
-The platform runs inside an isolated Docker network.
+The platform runs inside an isolated Docker network (`data_network`).
 
 Current containers:
 
-| Container    | Purpose                           |
-| ------------ | --------------------------------- |
-| postgres_db  | PostgreSQL database engine        |
-| pgadmin_gui  | Database administration interface |
-| etl_pipeline | ETL orchestration environment     |
+| Container     | Purpose                            | Port  |
+| ------------- | ---------------------------------- | ----- |
+| postgres_db   | PostgreSQL database engine         | 5432  |
+| pgadmin_gui   | Database administration interface  | 5050  |
+| etl_pipeline  | ETL orchestration environment      | —     |
+| api_dashboard | FastAPI REST API backend           | 8000  |
 
 Future architecture will include:
 
 | Container          | Purpose                         |
 | ------------------ | ------------------------------- |
-| api_dashboard      | FastAPI business API            |
-| frontend_dashboard | Business Intelligence Dashboard |
+| frontend_dashboard | AI-generated Business Dashboard |
 
 ---
 
@@ -122,6 +131,13 @@ Future architecture will include:
 
 ```text
 Sales_Intelligence_Platform/
+│
+├── api/
+│   ├── main.py
+│   ├── database.py
+│   ├── requirements.txt
+│   ├── Dockerfile
+│   └── README.md
 │
 ├── datasets/
 │   ├── source_crm/
@@ -417,6 +433,71 @@ The year 2013 represents the strongest growth period and should be investigated 
 
 ---
 
+# 🔌 FastAPI Backend
+
+## Objective
+
+Expose the PostgreSQL Analytics Layer as a REST API to serve the future Business Intelligence dashboard.
+
+The API acts as the bridge between the analytics database views and any frontend or external consumer.
+
+```text
+PostgreSQL Analytics Views
+        ↓
+FastAPI REST API  (port 8000)
+        ↓
+Frontend Dashboard
+```
+
+---
+
+## API Endpoints
+
+| Endpoint                     | View queried                    | Description                   |
+| ---------------------------- | ------------------------------- | ----------------------------- |
+| `GET /`                      | —                               | API root                      |
+| `GET /health`                | —                               | Database health check         |
+| `GET /api/kpis`              | `analytics.kpi_overview`        | Global executive KPIs         |
+| `GET /api/sales/trend`       | `analytics.sales_trend`         | Monthly revenue & orders      |
+| `GET /api/countries/performance` | `analytics.country_performance` | Market performance by country |
+| `GET /api/margins`           | `analytics.margin_analysis`     | Revenue and margin analysis   |
+| `GET /api/products/pareto`   | `analytics.product_pareto`      | Product Pareto analysis       |
+| `GET /api/customers/retention` | `analytics.customer_retention` | Purchase frequency            |
+| `GET /api/customers/rfm`     | `analytics.customer_rfm`        | RFM customer segmentation     |
+| `GET /api/customers/profile` | `analytics.customer_profile`    | Customer demographics         |
+| `GET /api/business/insights` | `analytics.business_insights`   | Strategic business summary    |
+
+---
+
+## API Files
+
+| File              | Purpose                                      |
+| ----------------- | -------------------------------------------- |
+| `api/main.py`     | FastAPI application — all endpoints          |
+| `api/database.py` | PostgreSQL helpers (`fetch_all`, `fetch_one`)|
+| `api/requirements.txt` | Python dependencies                     |
+| `api/Dockerfile`  | Docker image — python:3.11-slim, port 8000   |
+| `api/README.md`   | API documentation                            |
+
+---
+
+## Start the API
+
+```bash
+docker-compose up -d --build api_dashboard
+```
+
+## Access Points
+
+| URL | Description |
+|-----|-------------|
+| `http://localhost:8000` | API root |
+| `http://localhost:8000/health` | Health check |
+| `http://localhost:8000/docs` | **Swagger UI** (interactive) |
+| `http://localhost:8000/redoc` | ReDoc documentation |
+
+---
+
 # 📖 Data Catalog
 
 The complete business glossary and Gold Layer documentation are available in:
@@ -509,7 +590,22 @@ docker-compose exec etl_pipeline python scripts/analytics/load_analytics.py
 
 ---
 
-## 9. Stop Infrastructure
+## 9. Start FastAPI Backend
+
+```bash
+docker-compose up -d --build api_dashboard
+```
+
+Verify the API is running:
+
+```text
+http://localhost:8000/health
+http://localhost:8000/docs
+```
+
+---
+
+## 10. Stop Infrastructure
 
 ```bash
 docker-compose stop
@@ -541,17 +637,27 @@ docker-compose stop
 
 ✅ Analytics Automation
 
+✅ FastAPI Backend
+
+✅ Analytics REST API
+
+✅ Swagger UI Documentation
+
+✅ Dockerized API Service
+
 ---
 
-## Phase 2 — Next Step
+## Phase 2 — Completed
 
-🔄 FastAPI Backend
+✅ FastAPI Backend
 
-🔄 Analytics REST API
+✅ Analytics REST API (11 endpoints)
 
-🔄 Swagger Documentation
+✅ Swagger UI at `/docs`
 
-🔄 Dockerized API Service
+✅ Dockerized `api_dashboard` service
+
+✅ CORS enabled for frontend consumption
 
 ---
 

@@ -46,6 +46,7 @@ The goal of this layer is to provide reusable analytical views for:
 | `08_customer_rfm.sql` | `analytics.customer_rfm` | RFM customer segmentation |
 | `09_customer_profile.sql` | `analytics.customer_profile` | Demographic customer analysis |
 | `10_business_insights.sql` | `analytics.business_insights` | Strategic business summary |
+| `load_analytics.py` | — | Automation script — executes all SQL files in order |
 
 ---
 
@@ -91,6 +92,27 @@ SELECT * FROM analytics.customer_profile;
 
 SELECT * FROM analytics.business_insights;
 ```
+
+---
+
+## Automation
+
+The Analytics Layer can be created automatically using the Python script:
+
+```bash
+docker-compose exec etl_pipeline python scripts/analytics/load_analytics.py
+```
+
+This script:
+
+* Connects to PostgreSQL.
+* Detects all SQL files in the analytics folder.
+* Executes them in numerical order.
+* Commits each file after successful execution.
+* Rolls back the transaction if an error occurs.
+* Prints execution logs for traceability.
+
+The execution order is controlled by the numeric prefixes of the SQL files.
 
 ---
 

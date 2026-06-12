@@ -67,14 +67,13 @@ services:
       dockerfile: Dockerfile
     container_name: frontend_dashboard
     ports:
-      - "5173:5173"
+      - "8080:8080"
     environment:
       - VITE_API_BASE_URL=http://localhost:8000
     depends_on:
       - api_dashboard
     networks:
       - data_network
-
 
 # ----------------------------------------
 # 6. THE HARD DRIVE (Volumes)

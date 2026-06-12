@@ -1,25 +1,27 @@
 # 🚴 Sales Intelligence Platform
 
-### Modern Data Warehouse & Decision Support System using PostgreSQL, Python and Docker
+### End-to-End Decision Support System — Data Warehouse · REST API · Interactive Dashboard
+
+> ✅ **Project Status: Completed** — The full platform is live and runs entirely via Docker Compose.
 
 ---
 
 ## 📌 Project Overview
 
-The **Sales Intelligence Platform** is a modern end-to-end Decision Support System built on top of a Data Warehouse architecture following the Medallion approach (**Bronze → Silver → Gold**).
+The **Sales Intelligence Platform** is a complete, production-ready Decision Support System built on top of a multi-layer Data Warehouse architecture following the Medallion approach (**Bronze → Silver → Gold → Analytics**).
 
-The project was initially inspired by a traditional Microsoft SQL Server Data Warehouse implementation and was completely redesigned using an Open Source stack based on PostgreSQL, Python, and Docker.
+The project was initially inspired by a traditional Microsoft SQL Server Data Warehouse implementation and was completely redesigned using an Open Source stack based on PostgreSQL, Python, FastAPI, React, and Docker.
 
-Beyond the construction of the Data Warehouse itself, the project introduces a business-oriented analytical layer capable of transforming raw transactional data into actionable insights that support strategic decision-making.
+Beyond the construction of the Data Warehouse itself, the platform delivers a full-stack business intelligence system: from raw data ingestion to an interactive web dashboard accessible through a browser.
 
-The platform focuses on:
+The platform covers:
 
 * Sales Performance Analysis
-* Product Profitability Analysis
-* Customer Behavior Analysis
+* Product Profitability & Pareto Analysis
+* Customer Behavior & RFM Segmentation
 * Market Performance Evaluation
 * Customer Retention Assessment
-* Business Intelligence and Decision Support
+* Business Intelligence Dashboard with live KPIs and charts
 
 ---
 
@@ -84,46 +86,47 @@ Raw Data Sources
 └─────────────────┘
         │
         ▼
-Future
-AI Dashboard → Decision Support Platform
+┌─────────────────┐
+│ Frontend        │
+│ React Dashboard │
+│ Port 8080       │
+└─────────────────┘
 ```
 
 ---
 
 # 🛠️ Technology Stack
 
-| Component               | Technology      |
-| ----------------------- | --------------- |
-| Database                | PostgreSQL 16   |
-| ETL / ELT               | Python 3.11     |
-| Database Driver         | psycopg2        |
-| REST API Framework      | FastAPI         |
-| API Server              | Uvicorn         |
-| Containerization        | Docker          |
-| Orchestration           | Docker Compose  |
-| Database Administration | pgAdmin 4       |
-| Version Control         | Git & GitHub    |
+| Component               | Technology                     |
+| ----------------------- | ------------------------------ |
+| Database                | PostgreSQL 16                  |
+| ETL / ELT               | Python 3.11                    |
+| Database Driver         | psycopg2                       |
+| REST API Framework      | FastAPI                        |
+| API Server              | Uvicorn                        |
+| Frontend Framework      | React 19 + TanStack Router     |
+| Frontend Build Tool     | Vite + Bun                     |
+| UI Library              | shadcn/ui + Tailwind CSS       |
+| Charts                  | Recharts                       |
+| HTTP Client             | Axios + TanStack Query         |
+| Containerization        | Docker                         |
+| Orchestration           | Docker Compose                 |
+| Database Administration | pgAdmin 4                      |
+| Version Control         | Git & GitHub                   |
 
 ---
 
 # 🐳 Docker Infrastructure
 
-The platform runs inside an isolated Docker network (`data_network`).
+The entire platform runs inside an isolated Docker network (`data_network`) and is orchestrated by a single `docker-compose.yml`.
 
-Current containers:
-
-| Container     | Purpose                            | Port  |
-| ------------- | ---------------------------------- | ----- |
-| postgres_db   | PostgreSQL database engine         | 5432  |
-| pgadmin_gui   | Database administration interface  | 5050  |
-| etl_pipeline  | ETL orchestration environment      | —     |
-| api_dashboard | FastAPI REST API backend           | 8000  |
-
-Future architecture will include:
-
-| Container          | Purpose                         |
-| ------------------ | ------------------------------- |
-| frontend_dashboard | AI-generated Business Dashboard |
+| Container           | Purpose                            | Port |
+| ------------------- | ---------------------------------- | ---- |
+| postgres_db         | PostgreSQL database engine         | 5432 |
+| pgadmin_gui         | Database administration interface  | 5050 |
+| etl_pipeline        | ETL orchestration environment      | —    |
+| api_dashboard       | FastAPI REST API backend           | 8000 |
+| frontend_dashboard  | React/TanStack Dashboard           | 8080 |
 
 ---
 
@@ -132,10 +135,21 @@ Future architecture will include:
 ```text
 Sales_Intelligence_Platform/
 │
-├── api/
+├── api/                          # FastAPI REST backend
 │   ├── main.py
 │   ├── database.py
 │   ├── requirements.txt
+│   ├── Dockerfile
+│   └── README.md
+│
+├── frontend/                     # React / TanStack Dashboard
+│   ├── src/
+│   │   ├── routes/               # Dashboard pages
+│   │   ├── components/           # UI components & charts
+│   │   ├── hooks/                # React Query data hooks
+│   │   └── lib/api/              # API client & types
+│   ├── package.json
+│   ├── vite.config.ts
 │   ├── Dockerfile
 │   └── README.md
 │
@@ -437,55 +451,47 @@ The year 2013 represents the strongest growth period and should be investigated 
 
 ## Objective
 
-Expose the PostgreSQL Analytics Layer as a REST API to serve the future Business Intelligence dashboard.
-
-The API acts as the bridge between the analytics database views and any frontend or external consumer.
+Expose the PostgreSQL Analytics Layer as a REST API consumed by the React dashboard.
 
 ```text
 PostgreSQL Analytics Views
         ↓
 FastAPI REST API  (port 8000)
         ↓
-Frontend Dashboard
+React Dashboard   (port 8080)
 ```
 
 ---
 
 ## API Endpoints
 
-| Endpoint                     | View queried                    | Description                   |
-| ---------------------------- | ------------------------------- | ----------------------------- |
-| `GET /`                      | —                               | API root                      |
-| `GET /health`                | —                               | Database health check         |
-| `GET /api/kpis`              | `analytics.kpi_overview`        | Global executive KPIs         |
-| `GET /api/sales/trend`       | `analytics.sales_trend`         | Monthly revenue & orders      |
+| Endpoint                         | View queried                    | Description                   |
+| -------------------------------- | ------------------------------- | ----------------------------- |
+| `GET /`                          | —                               | API root                      |
+| `GET /health`                    | —                               | Database health check         |
+| `GET /api/kpis`                  | `analytics.kpi_overview`        | Global executive KPIs         |
+| `GET /api/sales/trend`           | `analytics.sales_trend`         | Monthly revenue & orders      |
 | `GET /api/countries/performance` | `analytics.country_performance` | Market performance by country |
-| `GET /api/margins`           | `analytics.margin_analysis`     | Revenue and margin analysis   |
-| `GET /api/products/pareto`   | `analytics.product_pareto`      | Product Pareto analysis       |
-| `GET /api/customers/retention` | `analytics.customer_retention` | Purchase frequency            |
-| `GET /api/customers/rfm`     | `analytics.customer_rfm`        | RFM customer segmentation     |
-| `GET /api/customers/profile` | `analytics.customer_profile`    | Customer demographics         |
-| `GET /api/business/insights` | `analytics.business_insights`   | Strategic business summary    |
+| `GET /api/margins`               | `analytics.margin_analysis`     | Revenue and margin analysis   |
+| `GET /api/products/pareto`       | `analytics.product_pareto`      | Product Pareto analysis       |
+| `GET /api/customers/retention`   | `analytics.customer_retention`  | Purchase frequency            |
+| `GET /api/customers/rfm`         | `analytics.customer_rfm`        | RFM customer segmentation     |
+| `GET /api/customers/profile`     | `analytics.customer_profile`    | Customer demographics         |
+| `GET /api/business/insights`     | `analytics.business_insights`   | Strategic business summary    |
 
 ---
 
 ## API Files
 
-| File              | Purpose                                      |
-| ----------------- | -------------------------------------------- |
-| `api/main.py`     | FastAPI application — all endpoints          |
-| `api/database.py` | PostgreSQL helpers (`fetch_all`, `fetch_one`)|
-| `api/requirements.txt` | Python dependencies                     |
-| `api/Dockerfile`  | Docker image — python:3.11-slim, port 8000   |
-| `api/README.md`   | API documentation                            |
+| File                   | Purpose                                       |
+| ---------------------- | --------------------------------------------- |
+| `api/main.py`          | FastAPI application — all endpoints           |
+| `api/database.py`      | PostgreSQL helpers (`fetch_all`, `fetch_one`) |
+| `api/requirements.txt` | Python dependencies                           |
+| `api/Dockerfile`       | Docker image — python:3.11-slim, port 8000    |
+| `api/README.md`        | API documentation                             |
 
 ---
-
-## Start the API
-
-```bash
-docker-compose up -d --build api_dashboard
-```
 
 ## Access Points
 
@@ -495,6 +501,56 @@ docker-compose up -d --build api_dashboard
 | `http://localhost:8000/health` | Health check |
 | `http://localhost:8000/docs` | **Swagger UI** (interactive) |
 | `http://localhost:8000/redoc` | ReDoc documentation |
+
+---
+
+# 🖥️ Frontend Dashboard
+
+## Overview
+
+The frontend is a modern React web application developed by the development team.
+It provides an interactive Business Intelligence dashboard connected to the FastAPI backend.
+
+```text
+FastAPI REST API  (port 8000)
+        ↓
+React Dashboard   (port 8080)
+```
+
+---
+
+## Dashboard Pages
+
+| Page          | Route          | Content                                  |
+| ------------- | -------------- | ---------------------------------------- |
+| Overview      | `/`            | Global KPI cards and executive summary   |
+| Sales         | `/sales`       | Monthly revenue trend charts             |
+| Markets       | `/markets`     | Country performance table and map        |
+| Products      | `/products`    | Pareto analysis and margin breakdown     |
+| Customers     | `/customers`   | RFM segmentation and retention analysis  |
+| Insights      | `/insights`    | Strategic business summary               |
+
+---
+
+## Frontend Tech Stack
+
+| Component    | Technology                  |
+| ------------ | --------------------------- |
+| Framework    | React 19                    |
+| Router       | TanStack Router             |
+| Data Fetching| TanStack Query + Axios      |
+| Charts       | Recharts                    |
+| UI System    | shadcn/ui + Tailwind CSS    |
+| Build Tool   | Vite + Bun                  |
+| Runtime      | Bun inside Docker           |
+
+---
+
+## Access
+
+| URL | Description |
+|-----|-------------|
+| `http://localhost:8080` | **Dashboard** (main entry point) |
 
 ---
 
@@ -590,18 +646,20 @@ docker-compose exec etl_pipeline python scripts/analytics/load_analytics.py
 
 ---
 
-## 9. Start FastAPI Backend
+## 9. Start the Full Platform (API + Frontend)
 
 ```bash
-docker-compose up -d --build api_dashboard
+docker-compose up -d --build
 ```
 
-Verify the API is running:
+All services will start. Verify:
 
-```text
-http://localhost:8000/health
-http://localhost:8000/docs
-```
+| URL | Expected result |
+|-----|-----------------|
+| `http://localhost:8080` | **Dashboard loads** |
+| `http://localhost:8000/health` | `{"api_status": "healthy"}` |
+| `http://localhost:8000/docs` | Swagger UI |
+| `http://localhost:5050` | pgAdmin |
 
 ---
 
@@ -615,65 +673,52 @@ docker-compose stop
 
 # 📈 Project Roadmap
 
-## Phase 1 — Completed
+## Phase 1 — ✅ Completed — Data Warehouse
 
-✅ Bronze Layer
+✅ Bronze Layer — Raw ingestion from CRM & ERP
 
-✅ Silver Layer
+✅ Silver Layer — Data cleansing & standardization
 
-✅ Gold Layer
+✅ Gold Layer — Star Schema (dim_customers, dim_products, fact_sales)
 
 ✅ Data Quality Validation
 
-✅ Business Analysis
+✅ Business Analysis from Gold Layer
 
-✅ Analytics Layer
+✅ Analytics Layer — 9 PostgreSQL business views
 
-✅ KPI Views
-
-✅ Customer Segmentation
-
-✅ Product Profitability Analysis
-
-✅ Analytics Automation
-
-✅ FastAPI Backend
-
-✅ Analytics REST API
-
-✅ Swagger UI Documentation
-
-✅ Dockerized API Service
+✅ Analytics Automation — `load_analytics.py`
 
 ---
 
-## Phase 2 — Completed
+## Phase 2 — ✅ Completed — REST API
 
-✅ FastAPI Backend
+✅ FastAPI Backend — 11 REST endpoints
 
-✅ Analytics REST API (11 endpoints)
+✅ Swagger UI at `http://localhost:8000/docs`
 
-✅ Swagger UI at `/docs`
-
-✅ Dockerized `api_dashboard` service
+✅ Dockerized `api_dashboard` service (port 8000)
 
 ✅ CORS enabled for frontend consumption
 
 ---
 
-## Phase 3 — Planned
+## Phase 3 — ✅ Completed — Frontend Dashboard
 
-⏳ AI-Generated Frontend (Lovable)
+✅ React 19 + TanStack Router dashboard developed by the development team
 
-⏳ Executive Dashboard
+✅ 6 dashboard pages (Overview, Sales, Markets, Products, Customers, Insights)
 
-⏳ Customer Intelligence Dashboard
+✅ Live KPI cards, revenue charts, country maps, Pareto analysis, RFM segmentation
 
-⏳ Product Intelligence Dashboard
+✅ Dockerized `frontend_dashboard` service (port 8080)
 
-⏳ Strategic Business Dashboard
+✅ Full platform orchestrated by a single `docker-compose up -d --build`
 
-⏳ End-to-End Decision Support Platform
+---
+
+> 🎉 **The Sales Intelligence Platform is fully operational.**
+> Run `docker-compose up -d --build` and open `http://localhost:8080` to access the dashboard.
 
 ---
 

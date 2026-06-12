@@ -508,7 +508,7 @@ React Dashboard   (port 8080)
 
 ## Overview
 
-The frontend is a modern React web application developed by the development team.
+The frontend is a modern React web application.
 It provides an interactive Business Intelligence dashboard connected to the FastAPI backend.
 
 ```text
@@ -705,7 +705,7 @@ docker-compose stop
 
 ## Phase 3 — ✅ Completed — Frontend Dashboard
 
-✅ React 19 + TanStack Router dashboard developed by the development team
+✅ React 19 + TanStack Router dashboard 
 
 ✅ 6 dashboard pages (Overview, Sales, Markets, Products, Customers, Insights)
 

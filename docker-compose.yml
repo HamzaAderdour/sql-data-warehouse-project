@@ -58,14 +58,31 @@ services:
     networks:
       - data_network
 
+  # ----------------------------------------
+  # 5. THE FRONTEND (React / TanStack)
+  # ----------------------------------------
+  frontend_dashboard:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_dashboard
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - api_dashboard
+    networks:
+      - data_network
+
 
 # ----------------------------------------
-# 4. THE HARD DRIVE (Volumes)
+# 6. THE HARD DRIVE (Volumes)
 # ----------------------------------------
 volumes:
   pgdata:
 
-    # 5. LES ROUTES (Connexions entre conteneurs)
+    # 7. LES ROUTES (Connexions entre conteneurs)
 networks:
   data_network:
     driver: bridge
